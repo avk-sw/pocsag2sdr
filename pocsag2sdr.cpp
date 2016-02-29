@@ -1,11 +1,5 @@
-// pocsag2sdr.cpp : Defines the entry point for the console application.
-//
+#include <stdio.h>
 
-#include "stdafx.h"
+int main(int argc, char *argv[]) {
 
-
-int main()
-{
-    return 0;
 }
-

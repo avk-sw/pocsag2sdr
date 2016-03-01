@@ -15,3 +15,4 @@ Destination parameters:
 <cap code> : pager CAP code
 <func> : function code; valid values from 0 to 3
 <message> : alphanumeric message; numeric messages aren't currently supported
+

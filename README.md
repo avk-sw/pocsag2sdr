@@ -4,7 +4,6 @@
 Usage: pocsag2sdr [-s <sample rate>] [-r <POCSAG baud rate>] [-d <deviation>] [-a <amplitude>] [-w <output file>] [-i] [-v] <cap code> <func> <message>
 
 -s <sample rate>: sample rate in samples per second, 8000000 by default; consult your SDR docs for the optimal values
-
 -r <POCSAG baud rate>: common values are 512, 1200 and 2400; though actually can be any integer. Default value is 1200
 
 -d <deviation>: frequency deviation; 4500 by default

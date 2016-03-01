@@ -1,7 +1,7 @@
 # POCSAG2SDR v.0.1 (C) Alexey Kuznetsov, avk@itn.ru, https://github.com/avk-sw/pocsag2sdr
 ### This program creates I/Q files suitable to transmit with SDR utlities like hackrf_transfer
 
-Usage: pocsag2sdr [-s <sample rate>] [-r <POCSAG baud rate>] [-d <deviation>] [-a <amplitude>] [-w <output file>] [-i] [-v] <cap code> <func> <message>
+Usage: pocsag2sdr [-s \<sample rate\>] [-r \<POCSAG baud rate\>] [-d \<deviation\>] [-a \<amplitude\>] [-w \<output file\>] [-i] [-v] \<cap code\> \<func\> \<message\>
 
 -s <sample rate>: sample rate in samples per second, 8000000 by default; consult your SDR docs for the optimal values
 

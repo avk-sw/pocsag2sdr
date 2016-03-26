@@ -19,7 +19,7 @@ Usage: pocsag2sdr [-s \<sample rate\>] [-r \<POCSAG baud rate\>] [-d \<deviation
 
 -i : turn on signal inversion; turned off by default
 
--v <number>: turn on verbose mode with the optional level <number>
+-v \<number\>: turn on verbose mode with the optional level <number>
 
 Destination parameters:
 

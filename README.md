@@ -2,7 +2,9 @@
 ### This program creates I/Q files suitable to transmit with SDR utlities like hackrf_transfer
 ### It can also send POCSAG frames via COM port using DTR for signal and RTS for PTT
 
-Usage: pocsag2sdr [-s \<sample rate\>] [-r \<POCSAG baud rate\>] [-d \<deviation\>] [-a \<amplitude\>] [-w \<output file\>] [-i] [-v] \<cap code\> \<func\> \<message\>
+Usage: pocsag2sdr options...] \<cap code\> \<func\> \<message\>
+
+Options:
 
 -s \<sample rate\>: sample rate in samples per second, 8000000 by default; consult your SDR docs for the optimal values
 

@@ -29,8 +29,10 @@ static void usage(void) {
 	printf(
 "\nPOCSAG2SDR v.0.2 (C) Alexey Kuznetsov, avk@itn.ru, https://github.com/avk-sw/pocsag2sdr\n\
 This program creates I/Q files suitable to transmit with SDR utlities like hackrf_transfer\n\
+It can also send POCSAG frames via COM port using DTR for signal and RTS for PTT\n\
 \n\
-Usage: pocsag2sdr [-s <sample rate>] [-r <POCSAG baud rate>] [-d <deviation>] [-a <amplitude>] [-w <output file>] [-i] [-v] <cap code> <func> <message>\n\
+Usage: pocsag2sdr [options...] <cap code> <func> <message>\n\
+Options:\n\
 -s <sample rate>: sample rate in samples per second, 8000000 by default; consult your SDR docs for the optimal values\n\
 -r <POCSAG baud rate>: common values are 512, 1200 and 2400; though actually can be any integer. Default value is 1200\n\
 -d <deviation>: frequency deviation; 4500 by default\n\

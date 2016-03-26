@@ -16,4 +16,6 @@ typedef struct FSK_params {
 	double *coss;
 } FSK_params;
 
-int init_fsk(FSK_params *fsk_p, uint32_t sample_rate, uint32_t dev, uint32_t bps, uint32_t ampl);
+int init_fsk(uint32_t sample_rate, uint32_t dev, uint32_t bps, uint32_t ampl,FILE *ofp);
+int fsk_output_bit(int bit);
+FSK_params *get_fsk_params(void);

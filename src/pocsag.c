@@ -14,7 +14,10 @@ POCSAG_batch *create_batch(void) {
 	POCSAG_batch *batch;
 	int i;
 	batch = malloc(sizeof(POCSAG_batch));
-	if (batch == NULL) return NULL;
+	if (batch == NULL) {
+		set_error(ERR_ERRNO, "[malloc]");
+		return NULL;
+	}
 	batch->data[0] = CW_SYNC;
 	for (i = 1; i < sizeof(batch->data) / sizeof(batch->data[0]); i++) {
 		batch->data[i] = CW_IDLE;
@@ -27,7 +30,10 @@ POCSAG_tx *create_preamble(void) {
 	POCSAG_tx *tx;
 	int i;
 	tx = malloc(sizeof(POCSAG_tx));
-	if (tx == NULL) return NULL;
+	if (tx == NULL) {
+		set_error(ERR_ERRNO, "[malloc]");
+		return NULL;
+	}
 	for (i = 0; i < sizeof(tx->preamble) / sizeof(tx->preamble[0]); i++) {
 		tx->preamble[i] = CW_PREAMBLE;
 	}

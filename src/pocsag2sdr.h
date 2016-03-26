@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "my_strerror.h"
 
 #define	CW_PREAMBLE	0xAAAAAAAA
 #define	CW_SYNC		0x7CD215D8
@@ -25,3 +26,5 @@ int add_message(POCSAG_tx *p_tx, uint32_t capcode, uint32_t func, uint8_t *msg);
 uint32_t get_cws(POCSAG_tx *p_tx, uint32_t *buf, uint32_t len);
 
 uint32_t pocsag_bch(uint32_t dw);
+
+int pocsag_out(POCSAG_tx *p_tx, void(*output_bit)(int bit), int inv, int verbose);

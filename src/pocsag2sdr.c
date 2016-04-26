@@ -27,7 +27,7 @@ For any other purposes please contact me at e-mail above or any other e-mail lis
 static void usage(void) {
 	PAGER_codetable *ptbl;
 	printf(
-"\nPOCSAG2SDR v.0.2 (C) Alexey Kuznetsov, avk@itn.ru, https://github.com/avk-sw/pocsag2sdr\n\
+"\nPOCSAG2SDR v.0.3 (C) Alexey Kuznetsov, avk@itn.ru, https://github.com/avk-sw/pocsag2sdr\n\
 This program creates I/Q files suitable to transmit with SDR utlities like hackrf_transfer\n\
 It can also send POCSAG frames via COM port using DTR for signal and RTS for PTT\n\
 \n\
@@ -41,7 +41,10 @@ Options:\n\
 -t <delay> : PTT delay in milliseconds in case of COM port encoder mode\n\
 -c <code_tables> : code table for message recoding\n\
 -i : turn on signal inversion; turned off by default\n\
+-n : send the message in numeric fortmat; otherwise it'll be sent as alpha-numeric\n\
 -v <number>: turn on verbose mode with the optional level <number>\n\
+-x : change DTR and RTS, i.e. use RTS for signal and DTR for PTT\n\
+-y : inverse PTT, i.e. use low level to key a transceiver\n\
 \n\
 Destination parameters:\n\
 <cap code> : pager CAP code\n\
@@ -95,7 +98,7 @@ int main( int argc, char *argv[] )
 	uint32_t amplitude = 0x40;
 	uint8_t *ofile = NULL;
 	uint8_t ofile_name[_MAX_PATH + 1];
-	int inv = 0,verbose = 0;
+	int inv = 0, PTTinv = 0, DtrRtsX = 0, KeepPTT = 0, isNum = 0, verbose = 0;
 
 	POCSAG_tx *p_tx;
 	PAGER_codetable *p_tbl=NULL;
@@ -106,9 +109,13 @@ int main( int argc, char *argv[] )
 
 	int rc,isSerial=0,PTTdelay=0;
 
-	while ((rc = getopt(argc, argv, "iv:t:s:r:d:a:w:c:")) != (-1)) {
+	while ((rc = getopt(argc, argv, "inxyzv:t:s:r:d:a:w:c:")) != (-1)) {
 		switch (rc) {
 		case 'i': inv = 1;	break;
+		case 'n': isNum = 1;	break;
+		case 'x': DtrRtsX = 1;	break;
+		case 'y': PTTinv = 1;	break;
+		case 'z': KeepPTT = 1;	break;
 		case 'v': verbose = 1;
 			if (optarg != NULL) verbose = atoi(optarg);
 			break;
@@ -142,7 +149,7 @@ int main( int argc, char *argv[] )
 	}
 
 	argc -= optind; argv += optind;
-	if ( argc<3 ) {
+	if ( argc<3 && !KeepPTT ) {
 		fprintf(stderr, "No destination specified\n");
 		usage();
 		return 1;
@@ -180,9 +187,17 @@ int main( int argc, char *argv[] )
 			printf("Samples per freq cycle: %ld/%lf\n", fsk_p->divider, fsk_p->divider_d);
 		}
 	} else {
-		printf("*** START *** COM port encoder mode\n");
-		if (init_serial(ofile, baud_rate, PTTdelay) == (-1)) {
+		if (KeepPTT) {
+			printf("*** START *** COM port PTT keeper mode\n");
+		} else {
+			printf("*** START *** COM port encoder mode\n");
+		}
+		if (init_serial(ofile, baud_rate, PTTdelay, DtrRtsX, PTTinv, KeepPTT) == (-1)) {
 			fprintf(stderr, "[init_serial]%s\n", my_strerror());
+			return 1;
+		}
+		if (start_serial() == (-1)) {
+			fprintf(stderr, "[start_serial]%s\n", my_strerror());
 			return 1;
 		}
 		if (verbose) {
@@ -213,7 +228,7 @@ int main( int argc, char *argv[] )
 		}
 		msg = recoded_msg;
 	}
-	if (add_message(p_tx, cap_code, func, msg) == (-1)) {
+	if (add_message(p_tx, cap_code, func, msg, isNum) == (-1)) {
 		fprintf(stderr, "[add_message]%s\n", my_strerror());
 		return 1;
 	}
@@ -224,7 +239,9 @@ int main( int argc, char *argv[] )
 
 	if (isSerial) {
 		COM_params *com_p = get_serial_params();
-		end_serial();
+		if (end_serial() == (-1)) {
+			fprintf(stderr, "[end_serial]%s\n", my_strerror());
+		}
 		printf("*** FINISH *** %ld bits have been sent, frequency: %lld, calculated # of ticks per bit: %lld, average # of ticks per bit: %lld\n", com_p->total_bits_sent,com_p->ticks_per_second.QuadPart,com_p->ticks_per_bit,(com_p->last_bit_ts.QuadPart - com_p->first_bit_ts.QuadPart)/com_p->total_bits_sent);
 		if (com_p->bits_with_delays) {
 			printf("*** WARNING *** %ld bits have been sent with delays, maximum delay is %lld ticks (%lf seconds)\n", com_p->bits_with_delays, com_p->max_delay,(double)com_p->max_delay/(double)com_p->ticks_per_second.QuadPart);

@@ -57,7 +57,7 @@ uint32_t make_csum(uint32_t dw) {
 	return dw;
 }
 
-int add_message(POCSAG_tx *p_tx,uint32_t capcode,uint32_t func,uint8_t *msg) {
+int add_message(POCSAG_tx *p_tx,uint32_t capcode,uint32_t func,uint8_t *msg, int isNum ) {
 	int frame,cw_bit;
 	int i;
 	uint32_t cw_capcode,cw_mask;
@@ -75,19 +75,33 @@ int add_message(POCSAG_tx *p_tx,uint32_t capcode,uint32_t func,uint8_t *msg) {
 
 	frame++;
 	cur_btch->data[frame] = 0x80000000;
+	if (isNum) cur_btch->data[frame] |= (0x33333 << 11);
 	cw_mask = 0x40000000;
 	cw_bit = 0;
 
 	for (i = 0; msg[i]; i++) {
 		uint8_t mask;
-		for (mask = 1; mask != 0x80; mask <<= 1) {
-			if (msg[i] & mask) {
-				cur_btch->data[frame] |= cw_mask;
+		uint8_t sym = msg[i];
+		if (isNum) {
+			if (sym >= '0' && sym <= '9') {
+				sym -= '0';
+			} else {
+				switch (sym) {
+				case 'U': sym = 0xB; break;
+				case ' ': sym = 0xC; break;
+				case '-': sym = 0xD; break;
+				case ')': sym = 0xE; break;
+				case '(': sym = 0xF; break;
+				default: continue;
+				}
 			}
-			cw_mask >>= 1;
-			if (++cw_bit == 20) {
+		} else {
+			sym &= 0x7F;
+		}
+		for (mask = 1; mask != (isNum ? 0x10 : 0x80); mask <<= 1) {
+			if (cw_bit == 20) {
 				cur_btch->data[frame] = make_csum(cur_btch->data[frame]);
-				if (++frame == sizeof(cur_btch->data) / sizeof(cur_btch->data[0]) ) {
+				if (++frame == sizeof(cur_btch->data) / sizeof(cur_btch->data[0])) {
 					POCSAG_batch *new_btch = create_batch();
 					if (new_btch == NULL) return (-1);
 					p_tx->last = cur_btch->next = new_btch;
@@ -95,9 +109,18 @@ int add_message(POCSAG_tx *p_tx,uint32_t capcode,uint32_t func,uint8_t *msg) {
 					frame = 1;
 				}
 				cur_btch->data[frame] = 0x80000000;
+				if (isNum) cur_btch->data[frame] |= (0x33333 << 11);
 				cw_mask = 0x40000000;
 				cw_bit = 0;
 			}
+
+			if (sym & mask) {
+				cur_btch->data[frame] |= cw_mask;
+			} else {
+				cur_btch->data[frame] &= ~cw_mask;
+			}
+			cw_mask >>= 1;
+			cw_bit++;
 		}
 	}
 	if( cw_bit ) cur_btch->data[frame] = make_csum(cur_btch->data[frame]);

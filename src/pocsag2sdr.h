@@ -22,9 +22,9 @@ typedef struct POCSAG_tx {
 POCSAG_batch *create_batch(void);
 POCSAG_tx *create_preamble(void);
 uint32_t make_csum(uint32_t dw);
-int add_message(POCSAG_tx *p_tx, uint32_t capcode, uint32_t func, uint8_t *msg);
+int add_message(POCSAG_tx *p_tx, uint32_t capcode, uint32_t func, uint8_t *msg, int isNum);
 uint32_t get_cws(POCSAG_tx *p_tx, uint32_t *buf, uint32_t len);
 
 uint32_t pocsag_bch(uint32_t dw);
 
-int pocsag_out(POCSAG_tx *p_tx, void(*output_bit)(int bit), int inv, int verbose);
+int pocsag_out(POCSAG_tx *p_tx, int (*output_bit)(int bit), int inv, int verbose);

@@ -16,12 +16,16 @@ For any other purposes please contact me at e-mail above or any other e-mail lis
 
 #ifdef WIN32
 #include <Windows.h>
+#include "serial.h"
+#else
+#define _MAX_PATH 1016//osx
 #endif // WIN32
 
 
 #include "pocsag2sdr.h"
 #include "fsk.h"
-#include "serial.h"
+
+
 #include "code_tables.h"
 
 static void usage(void) {
@@ -163,7 +167,8 @@ int main( int argc, char *argv[] )
 		} else {
 			strncpy(ofile_name, ofile, _MAX_PATH);
 		}
-	} else {
+	} else 
+	{
 		snprintf(ofile_name, _MAX_PATH, "POCSAG_%ld_%ld_%ld_%ld_%ld%s.bin",cap_code,func,baud_rate,dev,sample_rate,inv ? "_inv" : "");
 	}
 
@@ -186,7 +191,10 @@ int main( int argc, char *argv[] )
 			printf("Samples per bit: %ld/%lf\n", fsk_p->cycles_per_bit, fsk_p->cycles_per_bit_d);
 			printf("Samples per freq cycle: %ld/%lf\n", fsk_p->divider, fsk_p->divider_d);
 		}
-	} else {
+	} 
+#ifdef WIN32
+	else 
+	{
 		if (KeepPTT) {
 			printf("*** START *** COM port PTT keeper mode\n");
 		} else {
@@ -206,6 +214,7 @@ int main( int argc, char *argv[] )
 			printf("Ticks per bit: %lld\n", com_p->ticks_per_bit);
 		}
 	}
+	#endif
 	p_tx = create_preamble();
 	if (p_tx == NULL) {
 		fprintf(stderr, "[create_preamble]%s\n", my_strerror());
@@ -232,11 +241,16 @@ int main( int argc, char *argv[] )
 		fprintf(stderr, "[add_message]%s\n", my_strerror());
 		return 1;
 	}
-
+#ifdef WIN32
 	if (pocsag_out(p_tx, isSerial ? serial_output_bit : fsk_output_bit, inv, verbose) == (-1)) {
 		fprintf(stderr, "[pocsag_out]%s\n", my_strerror());
 	}
-
+#else
+		if (pocsag_out(p_tx,  fsk_output_bit, inv, verbose) == (-1)) {
+		fprintf(stderr, "[pocsag_out]%s\n", my_strerror());
+	}
+#endif
+#ifdef WIN32
 	if (isSerial) {
 		COM_params *com_p = get_serial_params();
 		if (end_serial() == (-1)) {
@@ -247,7 +261,9 @@ int main( int argc, char *argv[] )
 			printf("*** WARNING *** %ld bits have been sent with delays, maximum delay is %lld ticks (%lf seconds)\n", com_p->bits_with_delays, com_p->max_delay,(double)com_p->max_delay/(double)com_p->ticks_per_second.QuadPart);
 		}
 		// printf("GetTickCount stats: %ld msecs has elapsed, %lf msecs per bit\n", com_p->dwEnd - com_p->dwStart, (double)(com_p->dwEnd - com_p->dwStart) / (double)com_p->total_bits_sent);
-	} else {
+	} else 
+#endif
+	{
 		fclose(ofp);
 		printf("*** FINISH *** I/Q data have been successfully written to '%s'\n",ofile_name);
 	}

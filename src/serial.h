@@ -1,3 +1,4 @@
+#ifdef WIN32
 #include <stdint.h>
 #include <windows.h>
 
@@ -23,3 +24,4 @@ COM_params *get_serial_params(void);
 int serial_output_bit(int bit);
 int start_serial(void);
 int end_serial(void);
+#endif

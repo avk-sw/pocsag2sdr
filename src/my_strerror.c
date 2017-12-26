@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <Windows.h>
 
 #include "my_strerror.h"
 
@@ -11,6 +10,7 @@ static char *opt_error = NULL;
 static char my_error[MAXERRORLEN + 1];
 
 #ifdef WIN32
+#include <Windows.h>
 static char *strerror_win32(void)
 {
 	static char ret_err[MAXERRORLEN + 1];

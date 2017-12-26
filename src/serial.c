@@ -1,3 +1,4 @@
+#ifdef WIN32
 /*
 File:	serial.c
 Author:	(C) Alexey Kuznetsov, avk@itn.ru
@@ -212,3 +213,4 @@ int end_serial(void) {
 	// CloseHandle(com_p->serial_dev);
 	return 0;
 }
+#endif
